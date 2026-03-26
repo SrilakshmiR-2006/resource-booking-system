@@ -1,75 +1,97 @@
 <?php
+ob_start();
 session_start();
-include 'db.php';
+include "db.php";
+
+$error = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $query = "SELECT * FROM users WHERE email='$email'";
+    $result = mysqli_query($conn, $query);
+
+    if ($result && mysqli_num_rows($result) > 0) {
+
+    $row = mysqli_fetch_assoc($result);
+
+    if (password_verify($password, $row['password'])) {
+
+    $_SESSION['user'] = $email;
+
+    header("Location: calendar.php");
+    exit();
+
+} else {
+    $error = "Invalid password";
+}
+
+} else {
+    echo "USER NOT FOUND";
+    exit();
+}
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Login</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial;
-            text-align: center;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        input, button {
-            padding: 8px;
-            margin: 5px;
-        }
-        button {
-            background: green;
-            color: white;
-            border: none;
+
+        .login-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 
 <body>
 
-<h2>Login</h2>
+<div class="login-card">
+    <h3 class="text-center mb-3">Login</h3>
 
-<form method="POST">
-    Email: <input type="email" name="email" required><br>
-    Password: <input type="password" name="password" required><br>
-    <button name="login">Login</button>
-</form>
+    <?php if ($error != "") { ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php } ?>
 
-<?php
-if(isset($_POST['login'])){
+    <form method="POST">
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
 
-    // 🔍 check user
-    $result = $conn->query("SELECT * FROM users WHERE email='$email'");
-
-    if($result->num_rows > 0){
-
-        $row = $result->fetch_assoc();
-
-        // 🔐 verify password
-        if(password_verify($password, $row['password'])){
-
-            // ✅ store session
-            $_SESSION['user_id'] = $row['user_id'];
-            $_SESSION['name'] = $row['name'];
-
-            echo "<h3 style='color:green;'>Login successful!</h3>";
-
-            // 🔄 redirect to calendar
-            header("Location: calendar.php");
-            exit();
-
-        } else {
-            echo "<h3 style='color:red;'>Wrong password!</h3>";
-        }
-
-    } else {
-        echo "<h3 style='color:red;'>User not found!</h3>";
-    }
-}
-?>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <p style="text-align:center; margin-top:10px;">
+    Don't have an account? 
+    <a href="register.php" style="color:#2563eb; text-decoration:none; font-weight:500;">
+        Register here
+    </a>
+</p>
+    </form>
+</div>
 
 </body>
 </html>

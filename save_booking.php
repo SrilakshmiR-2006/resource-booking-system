@@ -1,39 +1,34 @@
 <?php
-include 'db.php';
+session_start();
+include "db.php";
 
-// Get data
-$resource_id = $_GET['resource_id'];
-$date = $_GET['date'];
-$start = $_GET['start'];
-$end = $_GET['end'];
-$user_id = $_GET['user'];
-
-// Combine date + time
-$start_datetime = $date . " " . $start;
-$end_datetime = $date . " " . $end;
-
-// Check conflict
-$check = "SELECT * FROM bookings 
-WHERE resource_id = '$resource_id'
-AND (
-    ('$start_datetime' BETWEEN CONCAT(booking_date,' ',start_time) AND CONCAT(booking_date,' ',end_time))
-    OR
-    ('$end_datetime' BETWEEN CONCAT(booking_date,' ',start_time) AND CONCAT(booking_date,' ',end_time))
-)";
-
-$result = mysqli_query($conn, $check);
-
-if(mysqli_num_rows($result) > 0){
-    echo "Time slot already booked!";
-    exit();
+/* VALIDATE INPUT */
+if (
+    !isset($_POST['resource_id']) ||
+    !isset($_POST['date']) ||
+    !isset($_POST['start_time']) ||
+    !isset($_POST['end_time'])
+) {
+    die("Invalid request");
 }
 
-// Insert correctly
-$sql = "INSERT INTO bookings (user_id, resource_id, booking_date, start_time, end_time)
-VALUES ('$user_id', '$resource_id', '$date', '$start', '$end')";
+/* GET DATA */
+$resource_id = $_POST['resource_id'];
+$date = $_POST['date'];
+$start = $_POST['start_time'];
+$end = $_POST['end_time'];
+$user = $_SESSION['user'];
 
-if(mysqli_query($conn, $sql)){
-    echo "<h2 style='color:green;'>✅ Booking Successful!</h2>";
+/* INSERT QUERY */
+$query = "INSERT INTO bookings (resource_id, booking_date, start_time, end_time, user_email)
+          VALUES ('$resource_id', '$date', '$start', '$end', '$user')";
+
+if (mysqli_query($conn, $query)) {
+
+    // ✅ REDIRECT BACK TO CALENDAR (IMPORTANT)
+    header("Location: calendar.php");
+    exit();
+
 } else {
     echo "Error: " . mysqli_error($conn);
 }
