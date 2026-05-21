@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
@@ -7,157 +8,236 @@ if (!isset($_SESSION['user'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
     <title>Resource Booking Calendar</title>
 
     <!-- FullCalendar -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f5f7fb;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        body{
+            font-family:'Poppins',sans-serif;
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            min-height:100vh;
+            padding:30px;
         }
 
-        h2 {
-            text-align: center;
-            font-weight: 600;
-            color: #1e293b;
+        .main-container{
+            max-width:1200px;
+            margin:auto;
         }
 
-        /* CALENDAR */
-        .fc {
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
+        /* TOP BAR */
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:25px;
         }
 
-        .fc-theme-standard td, 
-        .fc-theme-standard th {
-            border: 1px solid #e5e7eb;
+        .title{
+            color:white;
+            font-size:32px;
+            font-weight:600;
         }
 
-        .fc-daygrid-day-frame {
-            background: #fafafa;
+        .logout-btn{
+            background:#ef4444;
+            color:white;
+            padding:10px 18px;
+            border-radius:10px;
+            text-decoration:none;
+            transition:0.3s;
+            font-weight:500;
         }
 
-        /* MODAL BACKGROUND */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
+        .logout-btn:hover{
+            background:#dc2626;
         }
 
-        /* MODAL BOX */
-        .modal-box {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 14px;
-            width: 350px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-            animation: pop 0.25s ease;
+        /* CALENDAR CARD */
+
+        .calendar-card{
+            background:white;
+            border-radius:20px;
+            padding:25px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.15);
         }
 
-        @keyframes pop {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        /* FULLCALENDAR */
+
+        .fc-toolbar-title{
+            color:#1e293b;
+            font-weight:600;
         }
 
-        .modal-box h3 {
-            margin-bottom: 15px;
-            color: #1e293b;
+        .fc-button{
+            background:#4f46e5 !important;
+            border:none !important;
+            border-radius:8px !important;
+            padding:8px 14px !important;
         }
 
-        .modal-box select,
-        .modal-box input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
+        .fc-button:hover{
+            background:#4338ca !important;
         }
 
-        .modal-box button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
+        .fc-daygrid-day{
+            transition:0.2s;
         }
 
-        .modal-box button[type="submit"] {
-            background: #4f46e5;
-            color: white;
+        .fc-daygrid-day:hover{
+            background:#f3f4f6;
+            cursor:pointer;
         }
 
-        .modal-box button[type="submit"]:hover {
-            background: #4338ca;
+        .fc-event{
+            background:#10b981 !important;
+            border:none !important;
+            padding:3px;
+            border-radius:6px;
         }
 
-        .close-btn {
-            background: #e5e7eb;
+        /* MODAL */
+
+        .modal{
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.35);
+            backdrop-filter:blur(6px);
+            justify-content:center;
+            align-items:center;
+            z-index:999;
         }
+
+        .modal-content{
+            width:380px;
+            background:white;
+            border-radius:18px;
+            padding:30px;
+            animation:popup 0.25s ease;
+        }
+
+        @keyframes popup{
+            from{
+                transform:scale(0.9);
+                opacity:0;
+            }
+            to{
+                transform:scale(1);
+                opacity:1;
+            }
+        }
+
+        .modal-content h3{
+            margin-bottom:20px;
+            color:#1e293b;
+        }
+
+        .modal-content label{
+            font-size:14px;
+            color:#475569;
+        }
+
+        .modal-content select,
+        .modal-content input{
+            width:100%;
+            padding:12px;
+            margin-top:8px;
+            margin-bottom:15px;
+            border-radius:10px;
+            border:1px solid #d1d5db;
+        }
+
+        .book-btn{
+            width:100%;
+            background:#4f46e5;
+            color:white;
+            border:none;
+            padding:12px;
+            border-radius:10px;
+            cursor:pointer;
+            font-weight:500;
+        }
+
+        .book-btn:hover{
+            background:#4338ca;
+        }
+
+        .cancel-btn{
+            width:100%;
+            margin-top:10px;
+            background:#e5e7eb;
+            border:none;
+            padding:12px;
+            border-radius:10px;
+            cursor:pointer;
+        }
+
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<div class="main-container">
 
-    <h2 style="margin:0;">📅 Resource Booking Calendar</h2>
+    <!-- TOPBAR -->
 
-    <a href="logout.php" style="
-        text-decoration:none;
-        background:#ef4444;
-        color:white;
-        padding:6px 12px;
-        border-radius:6px;
-        font-size:14px;
-    ">
-        Logout
-    </a>
+    <div class="topbar">
+
+        <h1 class="title">📅 Resource Booking System</h1>
+
+        <a href="logout.php" class="logout-btn">
+            Logout
+        </a>
+
+    </div>
+
+    <!-- CALENDAR -->
+
+    <div class="calendar-card">
+        <div id="calendar"></div>
+    </div>
 
 </div>
-    <div id="calendar"></div>
-</div>
 
-<!-- MODAL -->
-<div id="bookingModal" class="modal">
-    <div class="modal-box">
+<!-- BOOKING MODAL -->
+
+<div class="modal" id="bookingModal">
+
+    <div class="modal-content">
 
         <h3>Book Resource</h3>
 
         <form action="save_booking.php" method="POST">
 
-            <input type="hidden" id="selectedDate" name="date">
+            <input type="hidden" name="date" id="selectedDate">
 
             <label>Resource</label>
+
             <select name="resource_id" required>
-                <option value="">Select</option>
+                <option value="">Select Resource</option>
                 <option value="1">Lab 1</option>
                 <option value="2">Lab 2</option>
                 <option value="3">Lab 3</option>
                 <option value="4">Skill Lab 1</option>
                 <option value="5">Skill Lab 2</option>
-                <option value="6">Multimedia Hall</option>
+                <option value="6">Multimedia Room</option>
                 <option value="7">Quadrangle</option>
                 <option value="8">Conference Hall</option>
             </select>
@@ -168,46 +248,59 @@ if (!isset($_SESSION['user'])) {
             <label>End Time</label>
             <input type="time" name="end_time" required>
 
-            <button type="submit">Book Now</button>
+            <button type="submit" class="book-btn">
+                Confirm Booking
+            </button>
+
         </form>
 
-        <button class="close-btn" onclick="closeModal()">Cancel</button>
+        <button onclick="closeModal()" class="cancel-btn">
+            Cancel
+        </button>
 
     </div>
+
 </div>
 
 <!-- FullCalendar -->
+
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function () {
 
-    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    var calendar = new FullCalendar.Calendar(
+        document.getElementById('calendar'),
 
-    initialView: 'dayGridMonth',
+    {
+        initialView: 'dayGridMonth',
 
-    events: 'fetch_events.php',
+        height: "auto",
 
-    eventTimeFormat: {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    },
+        events: 'fetch_events.php',
 
-    displayEventTime: true,
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        },
 
-    dateClick: function(info) {
-        document.getElementById('selectedDate').value = info.dateStr;
-        document.getElementById('bookingModal').style.display = 'flex';
-    }
-});
+        dateClick: function(info){
+
+            document.getElementById('selectedDate').value = info.dateStr;
+
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+    });
 
     calendar.render();
 });
 
-function closeModal() {
-    document.getElementById("bookingModal").style.display = "none";
+function closeModal(){
+    document.getElementById('bookingModal').style.display = 'none';
 }
+
 </script>
 
 </body>
